@@ -1,7 +1,7 @@
 import passport from "passport";
 import LocalStrategy from "passport-local";
 import {createHash, isValidPassword} from "../utils.js"
-import { usersService } from "../dao/managers/index.js";
+import { UsersService } from "../services/users.service.js";
 
 
 export const initializatePassport = () =>{
@@ -14,7 +14,7 @@ export const initializatePassport = () =>{
             try {
                 const {first_name, last_name, age} = req.body;
                 //verifico si el usuario ya se registro
-                const user = await usersService.getByEmail(username);
+                const user = await UsersService.getUserByEmail(username);
                 if(user){
                     return done(null, false);
                 }
@@ -23,7 +23,7 @@ export const initializatePassport = () =>{
                     email: username,
                     password: createHash(password)
                 };
-                const userCreated = await usersService.save(newUser);
+                const userCreated = await UsersService.saveUser(newUser);
                 return done(null, userCreated)
             } catch (error) {
                 return done(error)
@@ -35,7 +35,7 @@ export const initializatePassport = () =>{
         async(username,password,done)=>{
             try {
                 //verifico si el usuario ya se registro
-                const user = await usersService.getByEmail(username);
+                const user = await UsersService.getUserByEmail(username);
                 if(!user){
                     return done(null, false)
                 }
@@ -57,7 +57,7 @@ export const initializatePassport = () =>{
     });
 
     passport.deserializeUser(async(id,done)=>{
-        const user = await usersService.getById(id);
+        const user = await UsersService.getUserById(id);
         done(null, user); //req.user ---> sessions
     });
 };
